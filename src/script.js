@@ -1,16 +1,20 @@
 import './style.css'
-
 import * as THREE from 'three'
-
 const webGLCanvas = document.getElementById('webgl')
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+const { noise } = require('@chriscourses/perlin-noise')
+import terrainVertexShader from './shaders/perlinTerrain/vertex.glsl'
+import terrainFragmentShader from './shaders/perlinTerrain/fragment.glsl'
 
 const scene = new THREE.Scene()
+scene.fog = new THREE.FogExp2(0xa325f7, 0.1)
+scene.background = new THREE.Color(0xa325f7)
 
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
+
 
 window.addEventListener('resize', () =>
 {
@@ -28,11 +32,8 @@ window.addEventListener('resize', () =>
 })
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
-camera.position.z = 5
+camera.position.z = 15
 scene.add(camera)
-
-const ambientLight = new THREE.AmbientLight("#ffffff", 1)
-scene.add(ambientLight)
 
 const renderer = new THREE.WebGLRenderer({
     canvas: webGLCanvas,
@@ -45,22 +46,40 @@ renderer.physicallyCorrectLights = true
 const controls = new OrbitControls(camera, renderer.domElement)
 
 /*
- * Test Sphere
+ * Terrain Plain
  */
 
-const directionalLight = new THREE.DirectionalLight("#ffffff", 2)
-directionalLight.position.set(30.25, 30, 30)
-scene.add(directionalLight)
+const terrainGeometry = new THREE.PlaneBufferGeometry(30, 30, 32, 32)
 
-const sphereGeometry = new THREE.SphereBufferGeometry(1, 32, 32)
-const sphereMaterial = new THREE.MeshStandardMaterial()
-sphereMaterial.color = new THREE.Color("#ffffff")
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-scene.add(sphere)
+const count = terrainGeometry.attributes.position.count
+const randoms = new Float32Array(count)
+
+for(let i = 0; i < count; i++)
+{
+    randoms[i] = Math.random()
+}
+terrainGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+const terrainMaterial = new THREE.RawShaderMaterial({
+    vertexShader: terrainVertexShader,
+    fragmentShader: terrainFragmentShader
+})
+const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial)
+scene.add(terrain)
+
+const clock = new THREE.Clock()
 
 const animate = () => {
     requestAnimationFrame(animate)
     controls.update()
+
+    const elapsedTime = clock.getElapsedTime()
+
+    for(let i = 0; i < count; i++)
+    {
+        randoms[i] = noise(elapsedTime * 0.1 + i)
+    }
+    terrainGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+
     renderer.render(scene, camera)
 }
 
