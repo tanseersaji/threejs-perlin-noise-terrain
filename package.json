@@ -1,8 +1,8 @@
 {
-    "repository": "#",
-    "license": "UNLICENSED",
-    "scripts": {
-      "build": "webpack --config ./bundler/webpack.prod.js",
+  "repository": "#",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "webpack --config ./bundler/webpack.prod.js",
     "dev": "webpack serve --config ./bundler/webpack.dev.js"
   },
   "dependencies": {
