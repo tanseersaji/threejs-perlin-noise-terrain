@@ -10,8 +10,8 @@ import terrainFragmentShader from './shaders/perlinTerrain/fragment.glsl'
 import * as dat from 'dat.gui'
 
 const scene = new THREE.Scene()
-scene.fog = new THREE.Fog(0xef5eff, 0.1, 65)
-scene.background = new THREE.Color(0xef5eff)
+scene.fog = new THREE.Fog("#1C2541", 0.1, 65)
+scene.background = new THREE.Color("#1C2541")
 
 const sizes = {
     width: window.innerWidth,
@@ -19,6 +19,7 @@ const sizes = {
 }
 
 const gui = new dat.GUI()
+gui.hide()
 const options = {}
 
 window.addEventListener('resize', () =>
@@ -58,7 +59,7 @@ renderer.physicallyCorrectLights = true
  */
 
 const textureLoader = new THREE.TextureLoader()
-const jupiterTexture = textureLoader.load('textures/jupiter.jpg')
+const moonTexture = textureLoader.load('textures/moon.jpg')
 
 /*
  * Terrain Plain
@@ -93,8 +94,8 @@ options.planetRadius = 36.2
 const planetGeometry = new THREE.SphereBufferGeometry(1, 64, 64)
 const planetMaterial = new THREE.MeshStandardMaterial()
 
-planetMaterial.map = jupiterTexture
-planetMaterial.color = new THREE.Color("#c20dd6")
+planetMaterial.map = moonTexture
+planetMaterial.color = new THREE.Color("#424a69")
 
 const planet = new THREE.Mesh(planetGeometry, planetMaterial)
 
@@ -122,6 +123,10 @@ gui.add(planet.position, 'z').min(-100).max(50).step(0.1).name("PlanetPositionZ"
 
 scene.add(planet)
 
+/*
+ * Sun
+ */
+
 const sun = new THREE.DirectionalLight("#ffffff", 2.1)
 
 sun.position.set(157.5, 38.3, 97.9)
@@ -132,6 +137,32 @@ gui.add(sun.position, 'y').min(-50).max(500).step(0.1).name("SunPositionY")
 gui.add(sun.position, 'z').min(-50).max(500).step(0.1).name("SunPositionZ")
 
 scene.add(sun)
+
+/*
+ * Planet Backlight
+ */
+
+const planetBacklight = new THREE.DirectionalLight("#ffffff", 7.4)
+planetBacklight.position.set(44.3, 139.6, -27.3)
+scene.add(planetBacklight)
+
+gui.add(planetBacklight.position, 'x').min(-50).max(500).step(0.1).name("planetBacklightPositionX")
+gui.add(planetBacklight, 'intensity').min(1).max(10).step(0.1).name("planetBacklightIntensity")
+gui.add(planetBacklight.position, 'y').min(-50).max(500).step(0.1).name("planetBacklightPositionY")
+gui.add(planetBacklight.position, 'z').min(-50).max(500).step(0.1).name("planetBacklightPositionZ")
+
+/*
+ * Camera Animations
+ */
+const mouse = {
+    x: 0,
+    y: 0
+}
+window.addEventListener('mousemove', event => {
+    mouse.x = ((event.clientX / sizes.width) - 0.5) * 2
+    mouse.y = - (event.clientY / sizes.height - 0.5) * 2
+})
+
 const clock = new THREE.Clock()
 
 const animate = () => {
@@ -146,8 +177,11 @@ const animate = () => {
     }
     terrainGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
 
-    planet.rotation.y = - elapsedTime * 7 * Math.PI / 180
-    planet.rotation.z =  elapsedTime * 2 * Math.PI / 180
+    planet.rotation.y = - elapsedTime * 2 * Math.PI / 180
+    planet.rotation.z =  elapsedTime * Math.PI / 180
+
+    camera.position.x = mouse.x / 3
+    camera.position.y = mouse.y / 10
 
     renderer.render(scene, camera)
 }
