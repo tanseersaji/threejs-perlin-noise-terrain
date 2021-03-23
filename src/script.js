@@ -10,7 +10,7 @@ import terrainFragmentShader from './shaders/perlinTerrain/fragment.glsl'
 import * as dat from 'dat.gui'
 
 const scene = new THREE.Scene()
-scene.fog = new THREE.Fog("#1C2541", 0.1, 65)
+// scene.fog = new THREE.Fog("#1C2541", 0.1, 65)
 scene.background = new THREE.Color("#1C2541")
 
 const sizes = {
@@ -95,7 +95,7 @@ const planetGeometry = new THREE.SphereBufferGeometry(1, 64, 64)
 const planetMaterial = new THREE.MeshStandardMaterial()
 
 planetMaterial.map = planetTexture
-planetMaterial.color = new THREE.Color("#b5c3fd")
+planetMaterial.color = new THREE.Color("#402f64")
 
 
 const planet = new THREE.Mesh(planetGeometry, planetMaterial)
@@ -139,6 +139,31 @@ gui.add(sun.position, 'z').min(-50).max(500).step(0.1).name("SunPositionZ")
 
 scene.add(sun)
 
+/*
+ * Stars
+ */
+
+const startCount = 5000
+const starsGeometry = new THREE.BufferGeometry()
+const starPositions = new Float32Array(count * 3)
+
+for (let i = 0; i < count; i++) {
+    const i3 = i * 3
+    starPositions[i3] = (Math.random() - 0.5) * 500
+    starPositions[i3 + 1] = (Math.random() - 0.5) * 500
+    starPositions[i3 + 2] = ((Math.random() - 0.5) * 50) - 70
+}
+
+starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3))
+const starMaterial = new THREE.PointsMaterial({
+    size: 0.1,
+    sizeAttenuation: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+})
+
+const stars = new THREE.Points(starsGeometry, starMaterial)
+scene.add(stars)
 /*
  * Camera Animations
  */
