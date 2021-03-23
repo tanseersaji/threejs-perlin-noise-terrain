@@ -37,7 +37,7 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 1000)
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 200)
 camera.position.z = 15
 scene.add(camera)
 
@@ -48,9 +48,9 @@ const renderer = new THREE.WebGLRenderer({
     canvas: webGLCanvas,
     antialias: true
 })
-renderer.setPixelRatio(window.devicePixelRatio)
-renderer.setSize(window.innerWidth, window.innerHeight)
+// renderer.setPixelRatio(window.devicePixelRatio)
 renderer.physicallyCorrectLights = true
+renderer.setSize(sizes.width, sizes.height)
 
 // const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -164,6 +164,7 @@ const starMaterial = new THREE.PointsMaterial({
 
 const stars = new THREE.Points(starsGeometry, starMaterial)
 scene.add(stars)
+
 /*
  * Camera Animations
  */
