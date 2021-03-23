@@ -59,7 +59,7 @@ renderer.physicallyCorrectLights = true
  */
 
 const textureLoader = new THREE.TextureLoader()
-const moonTexture = textureLoader.load('textures/moon.jpg')
+const planetTexture = textureLoader.load('textures/jupiter.jpg')
 
 /*
  * Terrain Plain
@@ -94,8 +94,9 @@ options.planetRadius = 36.2
 const planetGeometry = new THREE.SphereBufferGeometry(1, 64, 64)
 const planetMaterial = new THREE.MeshStandardMaterial()
 
-planetMaterial.map = moonTexture
-planetMaterial.color = new THREE.Color("#424a69")
+planetMaterial.map = planetTexture
+planetMaterial.color = new THREE.Color("#b5c3fd")
+
 
 const planet = new THREE.Mesh(planetGeometry, planetMaterial)
 
@@ -137,19 +138,6 @@ gui.add(sun.position, 'y').min(-50).max(500).step(0.1).name("SunPositionY")
 gui.add(sun.position, 'z').min(-50).max(500).step(0.1).name("SunPositionZ")
 
 scene.add(sun)
-
-/*
- * Planet Backlight
- */
-
-const planetBacklight = new THREE.DirectionalLight("#ffffff", 7.4)
-planetBacklight.position.set(44.3, 139.6, -27.3)
-scene.add(planetBacklight)
-
-gui.add(planetBacklight.position, 'x').min(-50).max(500).step(0.1).name("planetBacklightPositionX")
-gui.add(planetBacklight, 'intensity').min(1).max(10).step(0.1).name("planetBacklightIntensity")
-gui.add(planetBacklight.position, 'y').min(-50).max(500).step(0.1).name("planetBacklightPositionY")
-gui.add(planetBacklight.position, 'z').min(-50).max(500).step(0.1).name("planetBacklightPositionZ")
 
 /*
  * Camera Animations
