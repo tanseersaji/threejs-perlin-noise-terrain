@@ -3,18 +3,23 @@ import * as THREE from 'three'
 const webGLCanvas = document.getElementById('webgl')
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 const { noise } = require('@chriscourses/perlin-noise')
+
 import terrainVertexShader from './shaders/perlinTerrain/vertex.glsl'
 import terrainFragmentShader from './shaders/perlinTerrain/fragment.glsl'
 
+import * as dat from 'dat.gui'
+
 const scene = new THREE.Scene()
-scene.fog = new THREE.FogExp2(0xa325f7, 0.1)
-scene.background = new THREE.Color(0xa325f7)
+scene.fog = new THREE.Fog(0xef5eff, 0.1, 65)
+scene.background = new THREE.Color(0xef5eff)
 
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
 
+const gui = new dat.GUI()
+const options = {}
 
 window.addEventListener('resize', () =>
 {
@@ -35,6 +40,9 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 camera.position.z = 15
 scene.add(camera)
 
+const ambientLight = new THREE.AmbientLight("#ffffff", 2)
+scene.add(ambientLight)
+
 const renderer = new THREE.WebGLRenderer({
     canvas: webGLCanvas,
     antialias: true
@@ -43,13 +51,20 @@ renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.physicallyCorrectLights = true
 
-const controls = new OrbitControls(camera, renderer.domElement)
+// const controls = new OrbitControls(camera, renderer.domElement)
+
+/*
+ * Textures
+ */
+
+const textureLoader = new THREE.TextureLoader()
+const jupiterTexture = textureLoader.load('textures/jupiter.jpg')
 
 /*
  * Terrain Plain
  */
 
-const terrainGeometry = new THREE.PlaneBufferGeometry(30, 30, 32, 32)
+const terrainGeometry = new THREE.PlaneBufferGeometry(60, 30, 64, 32)
 
 const count = terrainGeometry.attributes.position.count
 const randoms = new Float32Array(count)
@@ -61,24 +76,78 @@ for(let i = 0; i < count; i++)
 terrainGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
 const terrainMaterial = new THREE.RawShaderMaterial({
     vertexShader: terrainVertexShader,
-    fragmentShader: terrainFragmentShader
+    fragmentShader: terrainFragmentShader,
+    // fog: true
 })
+
 const terrain = new THREE.Mesh(terrainGeometry, terrainMaterial)
+terrain.position.y = -2;
+terrain.rotation.x = - Math.PI / 2;
 scene.add(terrain)
 
+/*
+ * Planet
+ */
+
+options.planetRadius = 36.2
+const planetGeometry = new THREE.SphereBufferGeometry(1, 64, 64)
+const planetMaterial = new THREE.MeshStandardMaterial()
+
+planetMaterial.map = jupiterTexture
+planetMaterial.color = new THREE.Color("#c20dd6")
+
+const planet = new THREE.Mesh(planetGeometry, planetMaterial)
+
+planet.scale.set(options.planetRadius, options.planetRadius, options.planetRadius)
+
+gui.add(options, 'planetRadius').min(0).max(50).step(0.1).name("PlanetRadius")
+    .onFinishChange(()=>{
+        planet.scale.set(options.planetRadius, options.planetRadius, options.planetRadius)
+    })
+
+planet.position.set(-30.7, -2.5, -50)
+
+planet.rotation.set(5.76, 0.67, 3.59)
+
+gui.add(planet.rotation, 'x').min(0).max(359 * Math.PI / 180).step(0.01)
+    .name("PlanetRotationX")
+gui.add(planet.rotation, 'y').min(0).max(359 * Math.PI / 180).step(0.01)
+    .name("PlanetRotationY")
+gui.add(planet.rotation, 'z').min(0).max(359 * Math.PI / 180).step(0.01)
+    .name("PlanetRotationZ")
+
+gui.add(planet.position, 'x').min(-100).max(50).step(0.1).name("PlanetPositionX")
+gui.add(planet.position, 'y').min(-100).max(50).step(0.1).name("PlanetPositionY")
+gui.add(planet.position, 'z').min(-100).max(50).step(0.1).name("PlanetPositionZ")
+
+scene.add(planet)
+
+const sun = new THREE.DirectionalLight("#ffffff", 2.1)
+
+sun.position.set(157.5, 38.3, 97.9)
+
+gui.add(sun.position, 'x').min(-50).max(500).step(0.1).name("SunPositionX")
+gui.add(sun, 'intensity').min(1).max(10).step(0.1).name("SunIntensity")
+gui.add(sun.position, 'y').min(-50).max(500).step(0.1).name("SunPositionY")
+gui.add(sun.position, 'z').min(-50).max(500).step(0.1).name("SunPositionZ")
+
+scene.add(sun)
 const clock = new THREE.Clock()
 
 const animate = () => {
     requestAnimationFrame(animate)
-    controls.update()
+    // controls.update()
 
     const elapsedTime = clock.getElapsedTime()
 
     for(let i = 0; i < count; i++)
     {
-        randoms[i] = noise(elapsedTime * 0.1 + i)
+        randoms[i] = noise(elapsedTime * 0.3 + i)
     }
     terrainGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1))
+
+    planet.rotation.y = - elapsedTime * 7 * Math.PI / 180
+    planet.rotation.z =  elapsedTime * 2 * Math.PI / 180
 
     renderer.render(scene, camera)
 }

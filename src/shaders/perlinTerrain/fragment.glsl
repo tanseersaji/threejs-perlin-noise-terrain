@@ -2,7 +2,10 @@ precision mediump float;
 
 varying float vRandom;
 
-void main() {
+#include <fog_pars_fragment>
 
-    gl_FragColor = vec4(0.7, vRandom , 1.0, 1.0);
+void main() {
+    gl_FragColor = vec4(0.8, vRandom - 0.1, 1.0, 1.0);
+
+    #include <fog_fragment>
 }
