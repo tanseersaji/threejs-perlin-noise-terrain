@@ -11,7 +11,7 @@ import * as dat from 'dat.gui'
 
 const scene = new THREE.Scene()
 // scene.fog = new THREE.Fog("#1C2541", 0.1, 65)
-scene.background = new THREE.Color("#1C2541")
+scene.background = new THREE.Color("#1a1d34")
 
 const sizes = {
     width: window.innerWidth,
@@ -48,7 +48,6 @@ const renderer = new THREE.WebGLRenderer({
     canvas: webGLCanvas,
     antialias: true
 })
-// renderer.setPixelRatio(window.devicePixelRatio)
 renderer.physicallyCorrectLights = true
 renderer.setSize(sizes.width, sizes.height)
 
@@ -59,7 +58,7 @@ renderer.setSize(sizes.width, sizes.height)
  */
 
 const textureLoader = new THREE.TextureLoader()
-const planetTexture = textureLoader.load('textures/jupiter.jpg')
+const planetTexture = textureLoader.load('textures/moon.jpg')
 
 /*
  * Terrain Plain
@@ -90,12 +89,12 @@ scene.add(terrain)
  * Planet
  */
 
-options.planetRadius = 36.2
+options.planetRadius = 23.7
 const planetGeometry = new THREE.SphereBufferGeometry(1, 64, 64)
 const planetMaterial = new THREE.MeshStandardMaterial()
 
 planetMaterial.map = planetTexture
-planetMaterial.color = new THREE.Color("#402f64")
+planetMaterial.color = new THREE.Color("#69509b")
 
 
 const planet = new THREE.Mesh(planetGeometry, planetMaterial)
@@ -107,9 +106,7 @@ gui.add(options, 'planetRadius').min(0).max(50).step(0.1).name("PlanetRadius")
         planet.scale.set(options.planetRadius, options.planetRadius, options.planetRadius)
     })
 
-planet.position.set(-30.7, -2.5, -50)
-
-planet.rotation.set(5.76, 0.67, 3.59)
+planet.position.set(-17.4, 18.4, -50)
 
 gui.add(planet.rotation, 'x').min(0).max(359 * Math.PI / 180).step(0.01)
     .name("PlanetRotationX")
@@ -128,7 +125,7 @@ scene.add(planet)
  * Sun
  */
 
-const sun = new THREE.DirectionalLight("#ffffff", 2.1)
+const sun = new THREE.DirectionalLight("#ffffff", 7)
 
 sun.position.set(157.5, 38.3, 97.9)
 
